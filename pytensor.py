@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""
+Created on 2017-2-19
+
+@author: Charl
+"""
 import re
 import os
 import datetime
@@ -11,19 +18,19 @@ def install_dpkg(work_path, cuda):
     match = re.compile(r"^lib[\w\d.-]*\+cuda"+cuda+r"[\w\d]+\.deb$")
     allfiles = os.listdir("./")
     filenames = []
-    filenames.sort()
+    #filenames.sort()
     for name in allfiles:
         regex =  match.search(name)
         if regex != None:
              filenames.append(regex.group())
     for name in filenames:
-        print "***********",name,"***********"
+        print "************",name,"*************"
         os.system("sudo dpkg -i "+ name)
     os.system("sudo apt-get -f install")
 def test_samples(cuda):
     name = "sample.sh"
     if os.path.exists(name):
-        os.system("bash " + name + " " + cuda + "2>&1 | tee full_samples_cuda"+ cuda + ".log")
+        os.system("bash " + name + " " + cuda + " 2>&1 | tee full_samples_cuda"+ cuda + ".log")
     else:
         print "file not exist!!"
 def test_gie(cuda):
@@ -54,10 +61,13 @@ if __name__ == '__main__':
     clean_dpkg()
     for cuda in cudas:
         homepath = os.getcwd()
+        #The path of the gie packages
         giepath = homepath+"/ubuntu"+osenv+".04"+"/cuda"+cuda+"/"
-        os.chdir(giepath)
-        os.system("cp *.tgz ../../")
-        os.chdir(homepath)
+        #os.chdir(giepath)
+        #copy the test.tgz to homepath
+        #os.system("cp *.tgz ../../")
+        #os.chdir(homepath)
+        os.system("cp " + giepath + "*.tgz ./")
         #install libcudnn
         install_dpkg(homepath+"/cudnn",cuda)
         #insatll libgie
