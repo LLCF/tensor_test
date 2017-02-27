@@ -6,6 +6,10 @@ cuda=7.5
 fi
 export LD_LIBRARY_PATH=/usr/local/cuda-$cuda/lib64
 cp -r /usr/src/gie_samples ./
+
+sudo rm /usr/local/cuda
+sudo ln -s /usr/local/cuda-$cuda /usr/local/cuda
+
 cd gie_samples/samples
 make
 cd bin

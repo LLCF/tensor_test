@@ -12,21 +12,24 @@ import datetime
 
 def clean_dpkg():
     os.system("sudo apt-get remove --purge libcudnn5* libgie* -y")
-    os.system("rm -rf cuda gie_samples *.tgz *.log *.txt")
-def install_dpkg(work_path, cuda):
+    os.system("rm -rf cuda gie_samples *.tgz *.log ")
+def install_dpkg(work_path, cuda, osenv):
     os.chdir(work_path)
-    match = re.compile(r"^lib[\w\d.-]*\+cuda"+cuda+r"[\w\d]+\.deb$")
+    #match = re.compile(r"^lib[\w\d.-]*\+cuda"+cuda+r"[\w\d]+\.deb$")
+    match = re.compile(r'nv-gie-repo-ubuntu'+osenv+r'[\w\d-]*?cuda'+cuda+r'[\w\d\.-]*?amd64.deb')
     allfiles = os.listdir("./")
     filenames = []
     #filenames.sort()
     for name in allfiles:
+        #print name
         regex =  match.search(name)
         if regex != None:
              filenames.append(regex.group())
     for name in filenames:
         print "************",name,"*************"
         os.system("sudo dpkg -i "+ name)
-    os.system("sudo apt-get -f install")
+    os.system("sudo apt-get update")
+    os.system("sudo apt-get install libgie2 libgie-dev -y")
 def test_samples(cuda):
     name = "sample.sh"
     if os.path.exists(name):
@@ -49,7 +52,7 @@ def save_result(ose, cuda):
     nowtime = datetime.datetime.now().strftime('%Y%m%d_%H%M')
     save_path = r"result/"+nowtime+"_"+ose+'.04_cuda'+ cuda
     os.system("mkdir -p " + save_path)
-    os.system("mv *.log *.txt " + save_path)
+    os.system("mv *.log" + save_path)
 
 if __name__ == '__main__':
     res = os.popen("lsb_release -a | grep -E ' ([0-9.]+) '").read()
@@ -58,7 +61,8 @@ if __name__ == '__main__':
         cudas=["7.5","8.0"]
     else:
         cudas=["8.0"]
-    clean_dpkg()
+    #cudas=["7.5"]
+    #clean_dpkg()
     for cuda in cudas:
         homepath = os.getcwd()
         #The path of the gie packages
@@ -67,14 +71,14 @@ if __name__ == '__main__':
         #copy the test.tgz to homepath
         #os.system("cp *.tgz ../../")
         #os.chdir(homepath)
-        os.system("cp " + giepath + "*.tgz ./")
+        #os.system("cp " + giepath + "*.tgz ./")
         #install libcudnn
-        install_dpkg(homepath+"/cudnn",cuda)
+        #install_dpkg(homepath+"/cudnn",cuda)
         #insatll libgie
-        install_dpkg(giepath, cuda)
+        install_dpkg(giepath, cuda, osenv)
         os.chdir(homepath)
         test_samples(cuda)
-        test_gie(cuda)
+        #test_gie(cuda)
         save_result(osenv, cuda)
         clean_dpkg()
 
